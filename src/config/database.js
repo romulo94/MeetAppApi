@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 module.exports = {
   dialect: 'postgres',
-  host: 'localhost',
-  username: 'postgres',
-  password: 'docker',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
   database: 'meetapp',
   define: {
     timestamps: true,
