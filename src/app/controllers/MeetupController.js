@@ -8,12 +8,19 @@ import File from '../models/File';
 class MeetupController {
   async index(req, res) {
     const where = {};
+    const order = [];
+    let orderIndex = null;
     if (req.query.date) {
       const searchDate = parseISO(req.query.date);
 
       where.date = {
         [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
       };
+    }
+    if (req.query.orderDate) {
+      orderIndex = order.length;
+      if (req.query.order === 'ASC') order[orderIndex] = ['dadsadtes', 'ASC'];
+      if (req.query.order === 'DESC') order[orderIndex] = ['dsd', 'DESC'];
     }
 
     const meetups = await Meetup.findAll({
@@ -27,6 +34,7 @@ class MeetupController {
           model: File,
         },
       ],
+      order,
     });
 
     return res.json(meetups);
