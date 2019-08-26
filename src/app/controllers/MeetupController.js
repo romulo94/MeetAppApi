@@ -7,6 +7,7 @@ import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
+    const page = req.query.page || 1;
     const where = {};
     const order = [];
     let orderIndex = null;
@@ -19,8 +20,8 @@ class MeetupController {
     }
     if (req.query.orderDate) {
       orderIndex = order.length;
-      if (req.query.order === 'ASC') order[orderIndex] = ['dadsadtes', 'ASC'];
-      if (req.query.order === 'DESC') order[orderIndex] = ['dsd', 'DESC'];
+      if (req.query.orderDate === 'ASC') order[orderIndex] = ['date', 'ASC'];
+      if (req.query.orderDate === 'DESC') order[orderIndex] = ['date', 'DESC'];
     }
 
     const meetups = await Meetup.findAll({
@@ -28,13 +29,16 @@ class MeetupController {
       include: [
         {
           model: User,
+
           attributes: ['id', 'name', 'email'],
         },
         {
           model: File,
         },
       ],
-      order,
+      // order,
+      limit: 10,
+      offset: 10 * page - 10,
     });
 
     return res.json(meetups);
@@ -64,46 +68,41 @@ class MeetupController {
   }
 
   async update(req, res) {
+    const user_id = req.userId;
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (meetup.user_id !== user_id) {
+      return res.status(401).json({ error: 'Not authorized' });
+    }
+
     const schema = Yup.object().shape({
-      name: Yup.string(),
-      email: Yup.string().email(),
-      oldPassword: Yup.string().min(3),
-      password: Yup.string()
-        .min(3)
-        .when('oldPassword', (oldPassword, field) =>
-          oldPassword ? field.required() : field
-        ),
-      confirmPassword: Yup.string().when('password', (password, field) =>
-        password ? field.required().oneOf([Yup.ref('password')]) : field
-      ),
+      title: Yup.string(),
+      description: Yup.string(),
+      local: Yup.string(),
+      date: Yup.date(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const { email, oldPassword } = req.body;
+    if (meetup.past)
+      return res.status(401).json({ error: 'Can not edit past meetups' });
 
-    const user = await Meetup.findByPk(req.userId);
+    if (req.body.date && isBefore(parseISO(req.body.date), new Date()))
+      return res.status(400).json({ error: 'Date invalid' });
 
-    if (oldPassword && !(await user.checkPassword(oldPassword))) {
-      return res.status(401).json({ error: 'Password does not match' });
-    }
-
-    if (email && email !== user.email) {
-      const userExist = await Meetup.findOne({ where: { email } });
-
-      if (userExist) {
-        return res.status(409).json({ error: 'Email already exists' });
-      }
-    }
-
-    const { id, name } = await user.update(req.body);
+    const { id, title, description, local, date } = await meetup.update(
+      req.body
+    );
 
     return res.json({
       id,
-      name,
-      email,
+      title,
+      description,
+      local,
+      date,
     });
   }
 

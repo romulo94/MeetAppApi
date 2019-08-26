@@ -8,6 +8,8 @@ import calculateMiddleware from './app/middlewares/calculate';
 
 import multerConfig from './config/multer';
 import MeetupController from './app/controllers/MeetupController';
+import MeetupOwnerController from './app/controllers/MeetupOwnerController';
+import SubscriptionController from './app/controllers/SubscriptionController';
 
 const upload = multer(multerConfig);
 
@@ -32,5 +34,11 @@ routes.post('/meetup', MeetupController.store);
 routes.put('/meetup/:id', MeetupController.update);
 routes.get('/meetup/:id', MeetupController.show);
 routes.delete('/meetup/:id', MeetupController.delete);
+
+routes.post('/meetups/:meetupId/subscriptions', SubscriptionController.store);
+
+routes.get('/organizer', MeetupOwnerController.index);
+
+routes.get('/subscription', SubscriptionController.index);
 
 export default routes;
