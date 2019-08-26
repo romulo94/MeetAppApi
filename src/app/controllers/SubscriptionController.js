@@ -2,6 +2,9 @@ import { Op } from 'sequelize';
 import User from '../models/User';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
+// import CancellationsMail from '../jobs/CancellationMail';
+import MeetingMail from '../jobs/MeetingMail';
+import Queue from '../../lib/Queue';
 
 class SubscriptionController {
   async index(req, res) {
@@ -35,6 +38,9 @@ class SubscriptionController {
         },
       ],
     });
+    if (!meetup) {
+      return res.status(404).json({ error: 'Non-existent meetup' });
+    }
 
     if (meetup.user_id === req.userId) {
       return res
@@ -77,6 +83,19 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: user.id,
       meetup_id: meetup.id,
+    });
+
+    const subscriptionsCount = await Subscription.findAll({
+      where: {
+        meetup_id: req.params.meetupId,
+      },
+    });
+
+    await Queue.add(MeetingMail.key, {
+      meetup,
+      organizer: meetup.User,
+      user,
+      total: subscriptionsCount.length,
     });
 
     return res.json(subscription);

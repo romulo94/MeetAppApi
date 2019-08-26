@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/server.js"
+    "start": "nodemon src/server.js",
+    "queue": "nodemon src/queue.js"
   },
   "dependencies": {
     "aws-sdk": "^2.515.0",
