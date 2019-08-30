@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import Youch from 'youch';
 import 'express-async-errors';
+import cors from 'cors';
 import routes from './routes';
 import './database';
 
@@ -15,6 +16,7 @@ class App {
   }
 
   routes() {
+    this.server.use(cors());
     this.server.use(routes);
   }
 
