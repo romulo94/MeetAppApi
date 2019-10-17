@@ -21,10 +21,10 @@ routes.post('/users', UserController.store);
 
 routes.post('/session', SessionController.store);
 
+routes.get('/users', UserController.index);
 // auth is required ->
 routes.use(authMiddleware);
 
-routes.get('/users', UserController.index);
 routes.put('/users', UserController.update);
 
 routes.post('/file', upload.single('file'), FileController.store);
