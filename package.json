@@ -8,7 +8,7 @@
     "queue": "nodemon src/queue.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.515.0",
+    "aws-sdk": "^2.814.0",
     "bcryptjs": "^2.4.3",
     "bee-queue": "^1.2.2",
     "cors": "^2.8.5",
